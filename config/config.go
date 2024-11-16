@@ -3,10 +3,8 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	ServerPort    string
-	DatabaseURL   string
-	GooseDir      string
-	GooseDBString string
+	ServerPort  string
+	DatabaseURL string
 }
 
 func LoadConfig() Config {
@@ -19,9 +17,7 @@ func LoadConfig() Config {
 		panic(err)
 	}
 	return Config{
-		ServerPort:    viper.GetString("server.port"),
-		DatabaseURL:   viper.GetString("database.url"),
-		GooseDir:      viper.GetString("goose.dir"),
-		GooseDBString: viper.GetString("goose.dbstring"),
+		ServerPort:  viper.GetString("server.port"),
+		DatabaseURL: viper.GetString("database.url"),
 	}
 }
