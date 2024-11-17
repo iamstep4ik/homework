@@ -1,15 +1,15 @@
 package db
 
 import (
-	"database/sql"
 	"homework/config"
 	"log"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-func Connect(cfg *config.Config) *sql.DB {
-	db, err := sql.Open("postgres", cfg.DatabaseURL)
+func Connect(cfg *config.Config) *sqlx.DB {
+	db, err := sqlx.Open("postgres", cfg.DatabaseURL)
 
 	if err != nil {
 		log.Fatalf("Unable to connect to the database: %v", err)
