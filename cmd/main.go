@@ -3,6 +3,7 @@ package main
 import (
 	"homework/config"
 	"homework/internal/handlers"
+	"homework/internal/middleware"
 	"homework/pkg/db"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,10 @@ func main() {
 	r.GET("/login", handlers.ServeLoginForm)
 	r.POST("/login", func(c *gin.Context) {
 		handlers.HandleUserLogin(c, database)
+	})
+
+	r.GET("/home", middleware.AuthMiddleware, func(c *gin.Context) {
+		handlers.ServeHomePage(c)
 	})
 
 	r.Run()

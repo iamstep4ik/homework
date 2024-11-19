@@ -1,8 +1,9 @@
 package db
 
 import (
-	"homework/config"
 	"log"
+
+	"homework/config"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"

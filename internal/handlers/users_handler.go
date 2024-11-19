@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"homework/internal/models"
+	"homework/utils"
 	"log"
 	"net/http"
 	"strings"
@@ -18,6 +19,10 @@ func ServeRegistrationForm(c *gin.Context) {
 
 func ServeLoginForm(c *gin.Context) {
 	c.File("internal/templates/login.html")
+}
+
+func ServeHomePage(c *gin.Context) {
+	c.File("internal/templates/home.html")
 }
 
 func HandleUserRegistration(c *gin.Context, db *sqlx.DB) {
@@ -83,6 +88,20 @@ func HandleUserLogin(c *gin.Context, db *sqlx.DB) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Password"})
 		return
 	}
+	loggedInUser := user.Username
 
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": user})
+	tokenString, err := utils.CreateToken(loggedInUser)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error creating token")
+		return
+	}
+
+	log.Printf("Token created %s\n", tokenString)
+	c.SetCookie("token", tokenString, 3600, "/", "localhost", false, true)
+	c.Redirect(http.StatusSeeOther, "/home")
+
+}
+
+func HandleHomePageUser(c *gin.Context, db *sqlx.DB) {
+
 }
