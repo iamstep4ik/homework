@@ -22,7 +22,15 @@ func ServeLoginForm(c *gin.Context) {
 }
 
 func ServeHomePage(c *gin.Context) {
-	c.File("internal/templates/home.html")
+	username, exists := c.Get("username")
+	if !exists {
+		log.Println("username not found in context")
+		c.Redirect(http.StatusSeeOther, "/login")
+		return
+	}
+	c.HTML(http.StatusOK, "home.html", gin.H{
+		"username": username,
+	})
 }
 
 func HandleUserRegistration(c *gin.Context, db *sqlx.DB) {
@@ -34,6 +42,12 @@ func HandleUserRegistration(c *gin.Context, db *sqlx.DB) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
+	}
+
+	check := utils.IsValidEmail(email)
+	if !check {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Email is invalid"})
+		log.Fatalf("email is invalid")
 	}
 
 	user := models.User{
@@ -60,7 +74,8 @@ func HandleUserRegistration(c *gin.Context, db *sqlx.DB) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Registration successful", "user": user})
+	log.Printf("user registred: %v\n", user)
+	c.Redirect(http.StatusSeeOther, "/login")
 }
 
 func HandleUserLogin(c *gin.Context, db *sqlx.DB) {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 func AuthMiddleware(c *gin.Context) {
@@ -25,8 +26,17 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Token verification successful. Claims %+v\n", token.Claims)
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		log.Println("Invalid token claims")
+		c.Redirect(http.StatusSeeOther, "/login")
+		c.Abort()
+		return
+	}
+
+	username := claims["sub"].(string)
+	log.Printf("Token verification successful for user: %s\n. Claims %+v\n", username, token.Claims)
+	c.Set("username", username)
 
 	c.Next()
-
 }
