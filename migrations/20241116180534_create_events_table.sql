@@ -9,7 +9,9 @@ create table Events(
     start_time timestamp not null,
     end_time timestamp not null,
     participant_count int default 0,
-    date_event date not null default(current_date)
+    date_event date not null default(current_date),
+    created_by bigint not null,
+    foreign key(created_by) references Users(id) on delete cascade
 
 );
 -- +goose StatementEnd

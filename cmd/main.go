@@ -31,9 +31,29 @@ func main() {
 		handlers.ServeHomePage(c)
 	})
 
+	r.GET("/create-event", middleware.AuthMiddleware, func(c *gin.Context) {
+		handlers.ServeCreateEventForm(c)
+	})
+
 	r.GET("/logout", func(c *gin.Context) {
 		c.SetCookie("token", "", -1, "/", "localhost", false, true)
 		c.Redirect(http.StatusSeeOther, "/login")
+	})
+
+	r.GET("/change-username", middleware.AuthMiddleware, func(c *gin.Context) {
+		handlers.ServeChangeUsernameForm(c)
+	})
+
+	r.POST("/change-username", middleware.AuthMiddleware, func(c *gin.Context) {
+		handlers.HandleChangeUsername(c, database)
+	})
+
+	r.GET("/change-password", middleware.AuthMiddleware, func(c *gin.Context) {
+		handlers.ServeChangePasswordForm(c)
+	})
+
+	r.POST("/change-password", middleware.AuthMiddleware, func(c *gin.Context) {
+		handlers.HandleChangePassword(c, database)
 	})
 
 	r.Run()

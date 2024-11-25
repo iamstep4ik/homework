@@ -4,10 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <link rel="stylesheet" href="/templates/styles.css">
 </head>
 <body>
-    <h1>Welcome, {{.username}}!</h1>
-    <p>You have successfully logged in.</p>
-    <a href="/logout">Logout</a>
+    <main class="container">
+        <h1>Welcome, {{.username}}!</h1>
+        <p>You have successfully logged in!</p>
+        <nav class="nav-links" aria-label="Primary navigation">
+            <a href="/create-event">Create Event</a>
+            <a href="/logout">Logout</a>
+            <a href="/change-password">Change Password</a>
+            <a href="/change-username">Change Username</a>
+        </nav>
+    </main>
 </body>
 </html>

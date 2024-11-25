@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Form</title>
+    <link rel="stylesheet" href="/templates/styles.css">
+</head>
+<body>
+    <h1>Create Event</h1>
+    <form action="/create-event" method="post">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name"><br><br>
+
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description"></textarea><br><br>
+
+        <label for="location">Location:</label><br>
+        <input type="text" id="location" name="location"><br><br>
+
+        <label for="start_time">Start Time:</label><br>
+        <input type="datetime-local" id="start_time" name="start_time"><br><br>
+
+        <label for="end_time">End Time:</label><br>
+        <input type="datetime-local" id="end_time" name="end_time"><br><br>
+
+        <label for="date">Date:</label><br>
+        <input type="date" id="date" name="date"><br><br>
+
+        <input type="submit" value="Create Event">
+    </form>
+</body>
+</html>

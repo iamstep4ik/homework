@@ -33,6 +33,16 @@ func ServeHomePage(c *gin.Context) {
 	})
 }
 
+func ServeChangeUsernameForm(c *gin.Context) {
+	c.HTML(http.StatusOK, "change-username.html", gin.H{
+		"username": c.MustGet("username").(string),
+	})
+}
+
+func ServeChangePasswordForm(c *gin.Context) {
+	c.File("internal/templates/change-password.html")
+}
+
 func HandleUserRegistration(c *gin.Context, db *sqlx.DB) {
 	username := c.PostForm("username")
 	email := c.PostForm("email")
@@ -117,6 +127,86 @@ func HandleUserLogin(c *gin.Context, db *sqlx.DB) {
 
 }
 
-func HandleHomePageUser(c *gin.Context, db *sqlx.DB) {
+func HandleChangeUsername(c *gin.Context, db *sqlx.DB) {
+	username := c.MustGet("username").(string)
+	newUsername := c.PostForm("newUsername")
 
+	var user models.User
+
+	query := "SELECT * FROM users WHERE username = $1"
+
+	err := db.Get(&user, query, username)
+	if err != nil {
+		log.Printf("Failed to retrieve user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
+		return
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Printf("Failed to begin transaction: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to begin transaction"})
+		return
+	}
+
+	query = "UPDATE users SET username = $1 WHERE username = $2"
+	_, err = tx.Exec(query, newUsername, username)
+	if err != nil {
+		log.Printf("Failed to update username: %v", err)
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update username"})
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Printf("Failed to commit transaction: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	tokenString, err := utils.CreateToken(newUsername)
+	if err != nil {
+		log.Printf("Failed to create token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create token"})
+		return
+	}
+
+	c.SetCookie("token", tokenString, 3600, "/", "localhost", false, true)
+
+	c.Set("username", newUsername)
+	c.Redirect(http.StatusSeeOther, "/home")
+}
+
+func HandleChangePassword(c *gin.Context, db *sqlx.DB) {
+	username := c.MustGet("username").(string)
+	password := c.PostForm("password")
+	newPassword := c.PostForm("newPassword")
+
+	var user models.User
+	query := "SELECT password_hash FROM users WHERE username = $1"
+	err := db.Get(&user, query, username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong"})
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid password"})
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash new password"})
+		return
+	}
+
+	query = "UPDATE users SET password_hash = $1 WHERE username = $2"
+	_, err = db.Exec(query, hashedPassword, username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+		return
+	}
+	c.Redirect(http.StatusSeeOther, "/home")
 }
