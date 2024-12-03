@@ -35,6 +35,10 @@ func main() {
 		handlers.ServeCreateEventForm(c)
 	})
 
+	r.POST("/create-event", middleware.AuthMiddleware, func(c *gin.Context) {
+		handlers.CreateEvent(c, database)
+	})
+
 	r.GET("/logout", func(c *gin.Context) {
 		c.SetCookie("token", "", -1, "/", "localhost", false, true)
 		c.Redirect(http.StatusSeeOther, "/login")

@@ -1,4 +1,4 @@
--- +goose Up
++goose Up
 -- +goose StatementBegin
 create extension if not exists citext;
 
@@ -16,4 +16,4 @@ create table Users(
 -- +goose Down
 -- +goose StatementBegin
 drop table Users;
--- +goose StatementEnd
+-- +goose StatementEnd 
