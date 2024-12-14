@@ -20,7 +20,6 @@ func HandleRegistrationEvent(c *gin.Context, db *sqlx.DB) {
 		return
 	}
 
-	// Check if the event exists
 	var event models.Event
 	query := "SELECT id FROM events WHERE id = $1"
 	log.Printf("Executing query: %s with EventID: %d", query, payload.EventID)
