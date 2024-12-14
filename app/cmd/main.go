@@ -40,17 +40,11 @@ func main() {
 		handlers.HandleUserProfile(c, database)
 	})
 
-	r.POST("/create-event", middleware.Auth, func(c *gin.Context) {
+	r.POST("/create-event", middleware.AuthMiddleware, func(c *gin.Context) {
 		handlers.CreateEvent(c, database)
 	})
 
-	r.GET("/my-events", middleware.Auth, func(c *gin.Context) {
+	r.GET("/my-events", middleware.AuthMiddleware, func(c *gin.Context) {
 		handlers.HandleMyEvents(c, database)
 	})
-
-	r.POST("/register-event", middleware.Auth, func(c *gin.Context) {
-		handlers.HandleRegistrationEvent(c, database)
-	})
-
-	r.Run()
 }
