@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 func HandleRegistrationEvent(c *gin.Context, db *sqlx.DB) {
@@ -78,4 +79,49 @@ func HandleRegistrationEvent(c *gin.Context, db *sqlx.DB) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Registration successful", "registration_id": registration.ID})
+}
+
+func HandleListRegistrations(c *gin.Context, db *sqlx.DB) {
+	username, exists := c.Get("username")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+	}
+
+	var user models.User
+	query := "select id from users where username = $1"
+	err := db.Get(&user, query, username)
+	if err != nil {
+		log.Printf("error fetching user: %v", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "failed to fetch user"})
+		return
+	}
+
+	var registrations []models.Registration
+	query = "select event_id from registrations where participant_id = $1"
+
+	err = db.Select(&registrations, query, user.ID)
+	if err != nil {
+		log.Printf("error fetching registrations: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch registrations"})
+		return
+	}
+
+	var events []models.Event
+	eventids := make([]int64, len(registrations))
+	for i, reg := range registrations {
+		eventids[i] = int64(reg.EventID)
+	}
+
+	if len(eventids) > 0 {
+		query = `select * from events where id = any($1)`
+		err = db.Select(&events, query, pq.Array(eventids))
+		if err != nil {
+			log.Printf("error fetching events: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch events"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"events": events})
+
 }

@@ -52,5 +52,9 @@ func main() {
 		handlers.HandleRegistrationEvent(c, database)
 	})
 
+	r.GET("/my-registrations", middleware.Auth, func(c *gin.Context) {
+		handlers.HandleListRegistrations(c, database)
+	})
+
 	r.Run()
 }
