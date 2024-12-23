@@ -36,15 +36,16 @@ services:
       - ./migrations:/migrations
 
   backend:
-    build:
-      dockerfile: Dockerfile.backend
+    image: backend
     container_name: backend
+    restart: unless-stopped
+    build:
+      context: ./
+      dockerfile: Dockerfile.backend
     env_file:
       - .envrc
     ports:
-      - "8080:8080"
-    environment:
-      - SERVER_PORT=${SERVER_PORT}
-      - DATABASE_URL=${DATABASE_URL}
+      - "${SERVER_PORT}:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy

@@ -1,6 +1,10 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"log"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	ServerPort  string
@@ -8,16 +12,20 @@ type Config struct {
 }
 
 func LoadConfig() Config {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(err)
+	viper.SetDefault("SERVER_PORT", "8080")
+	viper.SetDefault("DATABASE_URL", "")
+
+	serverPort := viper.GetString("SERVER_PORT")
+	databaseURL := viper.GetString("DATABASE_URL")
+
+	if serverPort == "" || databaseURL == "" {
+		log.Fatalf("Missing required configuration values")
 	}
+
 	return Config{
-		ServerPort:  viper.GetString("server.port"),
-		DatabaseURL: viper.GetString("database.url"),
+		ServerPort:  serverPort,
+		DatabaseURL: databaseURL,
 	}
 }
